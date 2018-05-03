@@ -70,7 +70,7 @@ public class ClientHandler implements Runnable {
         output.writeObject(status);
     }
 
-    private void close() {
+    protected void close() {
         server.remove(this);
         if (input != null) {
             try {
