@@ -18,7 +18,7 @@
         <dependency>
             <groupId>my.orange</groupId>
             <artifactId>Common</artifactId>
-            <version>0.0.1</version>
+            <version>${common.version}</version>
         </dependency>
 
         <dependency>
