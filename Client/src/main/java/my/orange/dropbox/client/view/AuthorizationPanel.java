@@ -1,39 +1,50 @@
 package my.orange.dropbox.client.view;
 
-import my.orange.dropbox.client.controller.AuthorizationTask;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class AuthorizationPanel extends Panel {
 
+    private JTextField passwordField;
+    private JButton loginButton, registerButton;
+
     public AuthorizationPanel() {
-        super(new AuthorizationTask());
         JTextField loginField = new JTextField();
         loginField.setPreferredSize(FIELD_DIMENSION);
         constraints.insets = new Insets(10, 10, 0, 10);
         constraints.gridwidth = 2;
         add(loginField, constraints);
 
-        JTextField passwordField = new JPasswordField();
+        passwordField = new JPasswordField();
         passwordField.setPreferredSize(FIELD_DIMENSION);
         constraints.insets = new Insets(0, 10, 0, 10);
         constraints.gridy = 1;
         add(passwordField, constraints);
 
-        JButton registerButton = new JButton("Register");
-        registerButton.addActionListener(listener);
+        registerButton = new JButton("Register");
+        registerButton.addActionListener(this);
         constraints.insets = new Insets(0, 10, 10, 10);
         constraints.gridwidth = 1;
         constraints.gridy = 2;
         add(registerButton, constraints);
 
-        JButton loginButton = new JButton("Login");
-        loginButton.addActionListener(listener);
+        loginButton = new JButton("Login");
+        loginButton.addActionListener(this);
         constraints.insets = new Insets(0, 10, 10, 10);
         constraints.anchor = GridBagConstraints.EAST;
         constraints.gridx = 1;
         add(loginButton, constraints);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == loginButton) {
+
+        }
+
+        if (e.getSource() == registerButton) {
+
+        }
     }
 }
