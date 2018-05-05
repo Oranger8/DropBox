@@ -36,7 +36,7 @@ public class ClientHandler implements Runnable {
             try {
                 switch ((Command) input.readObject()) {
 
-                    case AUTHORIZE:
+                    case LOGIN:
                         authenticate((User) input.readObject());
                         break;
 
@@ -49,10 +49,10 @@ public class ClientHandler implements Runnable {
                 log(e);
             }
         }
-        if (Thread.interrupted()) close();
         while (!Thread.interrupted()) {
             //TODO file exchange
         }
+        if (Thread.interrupted()) close();
     }
 
     private void authenticate(User user) throws IOException {
