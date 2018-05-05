@@ -16,11 +16,13 @@ import static my.orange.dropbox.server.LogManager.log;
 public class ClientHandler implements Runnable {
 
     private static AuthorizationService authorizationService = new DBAuthorization();
+    private static FileManager fileManager = new FileManager();
 
     private Server server;
     private Socket socket;
     private ObjectInputStream input;
     private ObjectOutputStream output;
+    private User user;
 
     ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
@@ -58,6 +60,7 @@ public class ClientHandler implements Runnable {
     private void authenticate(User user) throws IOException {
         Status status = authorizationService.authenticate(user.getLogin(), user.getPassword());
         if (status == Status.LOGIN_SUCCESS) {
+            this.user = user;
             server.add(this);
         }
         output.writeObject(status);
@@ -65,6 +68,8 @@ public class ClientHandler implements Runnable {
     private void register(User user) throws IOException {
         Status status = authorizationService.register(user.getLogin(), user.getPassword());
         if (status == Status.REGISTRATION_SUCCESS) {
+            this.user = user;
+            fileManager.addFolder(user);
             server.add(this);
         }
         output.writeObject(status);

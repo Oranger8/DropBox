@@ -24,4 +24,8 @@ public class LogManager {
     public static void log(Throwable throwable) {
         logger.log(Level.SEVERE, throwable.getMessage(), throwable);
     }
+
+    public static void log(String entry) {
+        logger.log(Level.SEVERE, entry);
+    }
 }

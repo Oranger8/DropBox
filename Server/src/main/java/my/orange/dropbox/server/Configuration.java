@@ -12,6 +12,7 @@ public class Configuration {
     private static Properties properties;
 
     public static int PORT;
+    public static String FOLDER;
 
     static {
         properties = new Properties();
@@ -20,6 +21,7 @@ public class Configuration {
             input = new FileInputStream("config.properties");
             properties.load(input);
             PORT = Integer.valueOf(properties.getProperty("port"));
+            FOLDER = properties.getProperty("folder");
         } catch (IOException e) {
             log(e);
         } finally {
