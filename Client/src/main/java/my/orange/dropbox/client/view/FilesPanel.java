@@ -1,11 +1,16 @@
 package my.orange.dropbox.client.view;
 
+import my.orange.dropbox.client.controller.FilesTask;
+import my.orange.dropbox.common.Command;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class FilesPanel extends Panel implements ActionListener {
+
+    private FilesTask filesTask;
 
     private JTable table;
     private JButton downloadButton, uploadButton, deleteButton;
@@ -35,7 +40,6 @@ public class FilesPanel extends Panel implements ActionListener {
         constraints.anchor = GridBagConstraints.EAST;
         constraints.gridx = 2;
         add(deleteButton, constraints);
-
     }
 
     @Override
