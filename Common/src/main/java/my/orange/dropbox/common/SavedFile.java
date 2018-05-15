@@ -1,20 +1,17 @@
 package my.orange.dropbox.common;
 
-public class SavedFile {
+import java.io.File;
+
+public class SavedFile extends File {
     
-    private String name;
     private String size;
 
-    public SavedFile(String name, long size) {
-        this.name = name;
-        if (size > 1024 * 1024 * 1024) this.size = size / 1024 / 1024 / 1024 + "GB";
-        if (size > 1024 * 1024) this.size = size / 1024 / 1024 + "MB";
-        if (size > 1024) this.size = size / 1024 + "KB";
-        this.size = size + "B";
-    }
-
-    public String getName() {
-        return name;
+    public SavedFile(String filePath) {
+        super(filePath);
+        if (length() > 1024 * 1024 * 1024) size = length() / 1024 / 1024 / 1024 + "GB";
+        if (length() > 1024 * 1024) size = length() / 1024 / 1024 + "MB";
+        if (length() > 1024) size = length() / 1024 + "KB";
+        size = length() + "B";
     }
 
     public String getSize() {
