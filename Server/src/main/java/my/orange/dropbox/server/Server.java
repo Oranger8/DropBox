@@ -1,63 +1,65 @@
 package my.orange.dropbox.server;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.Vector;
+import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Set;
 
-import static my.orange.dropbox.server.Configuration.*;
+import static my.orange.dropbox.server.Configuration.PORT;
 import static my.orange.dropbox.server.LogManager.log;
 
-public class Server implements Runnable {
+public class Server {
 
-    private ServerSocket serverSocket;
-    private Vector<ClientHandler> clients;
+    private ServerSocketChannel channel;
+    private Selector selector;
 
-    public Server(int port) {
-        Runtime.getRuntime().addShutdownHook(new Thread(this));
+    private Server(int port) {
         try {
-            serverSocket = new ServerSocket(port);
+            channel = ServerSocketChannel.open();
+            selector = Selector.open();
+            channel.bind(new InetSocketAddress(port));
+            channel.configureBlocking(false);
+            channel.register(selector, channel.validOps());
         } catch (IOException e) {
             log(e);
+        } finally {
+            try { channel.close(); } catch (IOException e) { log(e); }
         }
-        clients = new Vector<>();
     }
 
     private void start() {
-        while (true) {
+        while (channel.isOpen()) {
             try {
-                new ClientHandler(this, serverSocket.accept());
+                selector.select();
+                Set<SelectionKey> keys = selector.selectedKeys();
+                for (SelectionKey key : keys) {
+                    if (key.isAcceptable()) {
+                        accept(key);
+                        keys.iterator().remove();
+                    }
+                }
             } catch (IOException e) {
                 log(e);
             }
         }
     }
 
-    public void add(ClientHandler client) {
-        clients.add(client);
-    }
-
-    public void remove(ClientHandler client) {
-        clients.remove(client);
-    }
-
-    private void close() {
-        for (ClientHandler client : clients) {
-            client.close();
-        }
+    private void accept(SelectionKey key) {
+        SocketChannel channel = (SocketChannel) key.channel();
         try {
-            serverSocket.close();
+            channel.configureBlocking(false);
+            channel.register(selector, channel.validOps());
         } catch (IOException e) {
             log(e);
+        } finally {
+            try { channel.close(); } catch (IOException e) { log(e); }
         }
     }
 
     public static void main(String[] args) {
-        Server server = new Server(PORT);
-        server.start();
-    }
-
-    @Override
-    public void run() {
-        close();
+        new Server(PORT).start();
     }
 }

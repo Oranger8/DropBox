@@ -8,24 +8,24 @@ import java.util.logging.Logger;
 
 public class LogManager {
 
-    private static Logger logger;
+    private static Logger LOGGER;
 
     static {
-        logger = Logger.getLogger(Server.class.getName());
+        LOGGER = Logger.getLogger(Server.class.getName());
         File logsDir = new File("logs");
         if (!logsDir.exists()) logsDir.mkdir();
         try {
-            logger.addHandler(new FileHandler("logs/log", 50000, 10, true));
+            LOGGER.addHandler(new FileHandler("logs/log", 50000, 10, true));
         } catch (IOException e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
     public static void log(Throwable throwable) {
-        logger.log(Level.SEVERE, throwable.getMessage(), throwable);
+        LOGGER.log(Level.SEVERE, throwable.getMessage(), throwable);
     }
 
     public static void log(String entry) {
-        logger.log(Level.SEVERE, entry);
+        LOGGER.log(Level.SEVERE, entry);
     }
 }
