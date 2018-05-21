@@ -1,99 +1,64 @@
 package my.orange.dropbox.server;
 
-import my.orange.authorization.AuthorizationService;
-import my.orange.authorization.DBAuthorization;
-import my.orange.authorization.Status;
-import my.orange.dropbox.common.Command;
-import my.orange.dropbox.common.User;
-
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.util.Set;
 
+import static java.nio.channels.SelectionKey.OP_CONNECT;
+import static java.nio.channels.SelectionKey.OP_READ;
 import static my.orange.dropbox.server.LogManager.log;
 
 public class ClientHandler implements Runnable {
 
-    private static AuthorizationService authorizationService = new DBAuthorization();
-    private static FileManager fileManager = new FileManager();
+    private static final int CLIENT_OPS = OP_READ | OP_CONNECT;
 
-    private Server server;
-    private Socket socket;
-    private ObjectInputStream input;
-    private ObjectOutputStream output;
-    private User user;
+    private Selector selector;
 
-    ClientHandler(Server server, Socket socket) throws IOException {
-        this.server = server;
-        this.socket = socket;
-        input = new ObjectInputStream(socket.getInputStream());
-        output = new ObjectOutputStream(socket.getOutputStream());
+    public ClientHandler() throws IOException {
+        selector = Selector.open();
         new Thread(this).start();
+    }
+
+    void accept(SelectionKey key) {
+        SocketChannel channel = (SocketChannel) key.channel();
+        try {
+            channel.configureBlocking(false);
+            channel.register(selector, CLIENT_OPS);
+        } catch (IOException e) {
+            log(e);
+        }
+    }
+
+    void read(SelectionKey key) {
+
+    }
+
+    void disconnect(SelectionKey key) {
+        SocketChannel channel = (SocketChannel) key.channel();
+        channel.keyFor(selector).cancel();
     }
 
     @Override
     public void run() {
         while (!Thread.interrupted()) {
             try {
-                switch ((Command) input.readObject()) {
+                if (selector.select() < 0) continue;
+                Set<SelectionKey> keys = selector.selectedKeys();
+                for (SelectionKey key : keys) {
 
-                    case LOGIN:
-                        authenticate((User) input.readObject());
-                        break;
+                    if (key.isReadable()) {
+                        read(key);
+                        keys.iterator().remove();
+                    }
 
-                    case REGISTER:
-                        register((User) input.readObject());
-                        break;
+                    if (key.isConnectable()) {
+                        disconnect(key);
+                        keys.iterator().remove();
+                    }
 
                 }
-            } catch (IOException | ClassNotFoundException e) {
-                log(e);
-            }
-        }
-        while (!Thread.interrupted()) {
-            //TODO file exchange
-        }
-        if (Thread.interrupted()) close();
-    }
-
-    private void authenticate(User user) throws IOException {
-        Status status = authorizationService.authenticate(user.getLogin(), user.getPassword());
-        if (status == Status.LOGIN_SUCCESS) {
-            this.user = user;
-            server.add(this);
-        }
-        output.writeObject(status);
-    }
-    private void register(User user) throws IOException {
-        Status status = authorizationService.register(user.getLogin(), user.getPassword());
-        if (status == Status.REGISTRATION_SUCCESS) {
-            this.user = user;
-            fileManager.addFolder(user);
-            server.add(this);
-        }
-        output.writeObject(status);
-    }
-
-    protected void close() {
-        server.remove(this);
-        if (input != null) {
-            try {
-                input.close();
-            } catch (IOException e) {
-                log(e);
-            }
-        }
-        if (output != null) {
-            try {
-                output.close();
-            } catch (IOException e) {
-                log(e);
-            }
-        }
-        if (socket != null) {
-            try {
-                socket.close();
             } catch (IOException e) {
                 log(e);
             }

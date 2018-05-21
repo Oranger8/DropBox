@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.Set;
 
 import static my.orange.dropbox.server.Configuration.PORT;
@@ -15,6 +14,7 @@ public class Server {
 
     private ServerSocketChannel channel;
     private Selector selector;
+    private ClientHandler clientHandler;
 
     private Server(int port) {
         try {
@@ -23,6 +23,7 @@ public class Server {
             channel.bind(new InetSocketAddress(port));
             channel.configureBlocking(false);
             channel.register(selector, channel.validOps());
+            clientHandler = new ClientHandler();
         } catch (IOException e) {
             log(e);
         } finally {
@@ -33,29 +34,17 @@ public class Server {
     private void start() {
         while (channel.isOpen()) {
             try {
-                selector.select();
+                if (selector.select() < 0) continue;
                 Set<SelectionKey> keys = selector.selectedKeys();
                 for (SelectionKey key : keys) {
                     if (key.isAcceptable()) {
-                        accept(key);
+                        clientHandler.accept(key);
                         keys.iterator().remove();
                     }
                 }
             } catch (IOException e) {
                 log(e);
             }
-        }
-    }
-
-    private void accept(SelectionKey key) {
-        SocketChannel channel = (SocketChannel) key.channel();
-        try {
-            channel.configureBlocking(false);
-            channel.register(selector, channel.validOps());
-        } catch (IOException e) {
-            log(e);
-        } finally {
-            try { channel.close(); } catch (IOException e) { log(e); }
         }
     }
 
