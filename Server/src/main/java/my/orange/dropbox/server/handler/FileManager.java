@@ -1,4 +1,4 @@
-package my.orange.dropbox.server;
+package my.orange.dropbox.server.handler;
 
 import my.orange.dropbox.common.SavedFile;
 import my.orange.dropbox.common.User;

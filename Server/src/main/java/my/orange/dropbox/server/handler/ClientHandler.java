@@ -1,10 +1,12 @@
-package my.orange.dropbox.server;
+package my.orange.dropbox.server.handler;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static java.nio.channels.SelectionKey.OP_CONNECT;
 import static java.nio.channels.SelectionKey.OP_READ;
@@ -14,14 +16,16 @@ public class ClientHandler implements Runnable {
 
     private static final int CLIENT_OPS = OP_READ | OP_CONNECT;
 
+    private ExecutorService executor;
     private Selector selector;
 
     public ClientHandler() throws IOException {
         selector = Selector.open();
+        executor = Executors.newCachedThreadPool();
         new Thread(this).start();
     }
 
-    void accept(SelectionKey key) {
+    public void accept(SelectionKey key) {
         SocketChannel channel = (SocketChannel) key.channel();
         try {
             channel.configureBlocking(false);
@@ -29,10 +33,6 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             log(e);
         }
-    }
-
-    void read(SelectionKey key) {
-
     }
 
     void disconnect(SelectionKey key) {
@@ -49,7 +49,7 @@ public class ClientHandler implements Runnable {
                 for (SelectionKey key : keys) {
 
                     if (key.isReadable()) {
-                        read(key);
+                        executor.submit(new ClientTask(key));
                         keys.iterator().remove();
                     }
 
