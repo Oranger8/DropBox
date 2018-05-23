@@ -1,4 +1,6 @@
-package my.orange.dropbox.server;
+package my.orange.dropbox.server.util;
+
+import my.orange.dropbox.server.Server;
 
 import java.io.File;
 import java.io.IOException;

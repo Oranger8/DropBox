@@ -1,6 +1,7 @@
 package my.orange.dropbox.server;
 
 import my.orange.dropbox.server.handler.ClientHandler;
+import my.orange.dropbox.server.util.Configuration;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,20 +10,19 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Set;
 
-import static my.orange.dropbox.server.Configuration.PORT;
-import static my.orange.dropbox.server.LogManager.log;
+import static my.orange.dropbox.server.util.LogManager.log;
 
-public class Server implements Runnable {
+public class Server extends Configuration implements Runnable {
 
     private ServerSocketChannel channel;
     private Selector selector;
     private ClientHandler clientHandler;
 
-    private Server(int port) {
+    private Server() {
         try {
             channel = ServerSocketChannel.open();
             selector = Selector.open();
-            channel.bind(new InetSocketAddress(port));
+            channel.bind(new InetSocketAddress(PORT));
             channel.configureBlocking(false);
             channel.register(selector, channel.validOps());
             clientHandler = new ClientHandler();
@@ -57,6 +57,6 @@ public class Server implements Runnable {
     }
 
     public static void main(String[] args) {
-        new Server(PORT).start();
+        new Server().start();
     }
 }

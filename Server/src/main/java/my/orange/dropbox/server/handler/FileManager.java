@@ -5,8 +5,7 @@ import my.orange.dropbox.common.User;
 
 import java.io.File;
 
-import static my.orange.dropbox.server.Configuration.*;
-import static my.orange.dropbox.server.LogManager.log;
+import static my.orange.dropbox.server.util.LogManager.log;
 
 public class FileManager {
 
