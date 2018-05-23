@@ -21,7 +21,7 @@ public class AuthorizationTask implements Callable<Command> {
 
     @Override
     public Command call() {
-        try {
+        /*try {
             ObjectInputStream input = new ObjectInputStream(Client.socket.getInputStream());
             ObjectOutputStream output = new ObjectOutputStream(Client.socket.getOutputStream());
             output.writeObject(command);
@@ -29,7 +29,7 @@ public class AuthorizationTask implements Callable<Command> {
             return  (Command) input.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-        }
+        }*/
         return null;
     }
 }

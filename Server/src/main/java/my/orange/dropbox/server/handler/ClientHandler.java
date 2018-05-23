@@ -1,5 +1,7 @@
 package my.orange.dropbox.server.handler;
 
+import my.orange.dropbox.server.util.LogManager;
+
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -10,16 +12,18 @@ import java.util.concurrent.Executors;
 
 import static java.nio.channels.SelectionKey.OP_CONNECT;
 import static java.nio.channels.SelectionKey.OP_READ;
-import static my.orange.dropbox.server.util.LogManager.log;
 
 public class ClientHandler implements Runnable {
 
     private static final int CLIENT_OPS = OP_READ | OP_CONNECT;
 
+    private LogManager logger;
+
     private ExecutorService executor;
     private Selector selector;
 
     public ClientHandler() throws IOException {
+        logger = LogManager.getLogger();
         selector = Selector.open();
         executor = Executors.newCachedThreadPool();
         new Thread(this).start();
@@ -31,7 +35,7 @@ public class ClientHandler implements Runnable {
             channel.configureBlocking(false);
             channel.register(selector, CLIENT_OPS);
         } catch (IOException e) {
-            log(e);
+            logger.log("Failed to configure non-blocking client channel", e);
         }
     }
 
@@ -60,7 +64,7 @@ public class ClientHandler implements Runnable {
 
                 }
             } catch (IOException e) {
-                log(e);
+                logger.log("Failed to listen for channel actions", e);
             }
         }
     }

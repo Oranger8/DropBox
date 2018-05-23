@@ -1,6 +1,5 @@
 package my.orange.dropbox.client;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -16,7 +15,7 @@ public class Configuration {
         properties = new Properties();
         InputStream in = null;
         try {
-            in = new FileInputStream("config.properties");
+            in = Configuration.class.getResourceAsStream("/config.properties");
             properties.load(in);
             HOST = properties.getProperty("host");
             PORT = Integer.valueOf(properties.getProperty("port"));

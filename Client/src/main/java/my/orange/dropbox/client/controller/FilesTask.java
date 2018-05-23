@@ -24,7 +24,7 @@ public class FilesTask implements Callable {
 
     @Override
     public Object call() {
-        try {
+        /*try {
             ObjectInputStream input = new ObjectInputStream(Client.socket.getInputStream());
             ObjectOutputStream output = new ObjectOutputStream(Client.socket.getOutputStream());
             output.writeObject(command);
@@ -43,6 +43,7 @@ public class FilesTask implements Callable {
             return input.readObject();
         } catch (IOException | ClassNotFoundException e) {
             return e;
-        }
+        }*/
+        return null;
     }
 }

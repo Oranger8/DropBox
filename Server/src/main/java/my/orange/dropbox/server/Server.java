@@ -2,6 +2,7 @@ package my.orange.dropbox.server;
 
 import my.orange.dropbox.server.handler.ClientHandler;
 import my.orange.dropbox.server.util.Configuration;
+import my.orange.dropbox.server.util.LogManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -10,9 +11,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Set;
 
-import static my.orange.dropbox.server.util.LogManager.log;
-
 public class Server extends Configuration implements Runnable {
+
+    private LogManager logger;
 
     private ServerSocketChannel channel;
     private Selector selector;
@@ -20,6 +21,7 @@ public class Server extends Configuration implements Runnable {
 
     private Server() {
         try {
+            logger = LogManager.getLogger();
             channel = ServerSocketChannel.open();
             selector = Selector.open();
             channel.bind(new InetSocketAddress(PORT));
@@ -28,9 +30,7 @@ public class Server extends Configuration implements Runnable {
             clientHandler = new ClientHandler();
             Runtime.getRuntime().addShutdownHook(new Thread(this));
         } catch (IOException e) {
-            log(e);
-        } finally {
-            try { channel.close(); } catch (IOException e) { log(e); }
+            logger.log("Failed to start server", e);
         }
     }
 
@@ -46,7 +46,7 @@ public class Server extends Configuration implements Runnable {
                     }
                 }
             } catch (IOException e) {
-                log(e);
+                logger.log("Failed to listen for connections", e);
             }
         }
     }

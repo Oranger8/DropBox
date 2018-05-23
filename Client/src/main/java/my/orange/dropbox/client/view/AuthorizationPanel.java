@@ -67,7 +67,7 @@ public class AuthorizationPanel extends Panel {
                     JOptionPane.showMessageDialog(this, "Password incorrect");
                     break;
                 case AUTH_SUCCESS:
-                    Client.user = user;
+                    //Client.user = user;
                     frame.setAuthorized(true);
                     break;
             }
