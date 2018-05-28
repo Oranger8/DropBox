@@ -24,7 +24,7 @@ public class Configuration {
             e.printStackTrace();
         }
         try {
-            checkFile();
+            checkProperties();
             input = new FileInputStream("config.properties");
             properties.load(input);
             PORT = Integer.valueOf(properties.getProperty("port"));
@@ -40,11 +40,22 @@ public class Configuration {
                 }
             }
         }
+        try {
+            checkDB();
+        } catch (IOException e) {
+            logger.log("Failed to extract database", e);
+        }
     }
 
-    private void checkFile() throws IOException {
+    private void checkProperties() throws IOException {
         Path path = Paths.get("config.properties");
         if (!Files.exists(path))
             Files.copy(Configuration.class.getResourceAsStream("/config.properties"), path);
+    }
+
+    private void checkDB() throws IOException {
+        Path path = Paths.get("data.db");
+        if (!Files.exists(path))
+            Files.copy(Configuration.class.getResourceAsStream("/sample.db"), path);
     }
 }

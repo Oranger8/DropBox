@@ -20,12 +20,11 @@ public class ClientTask implements Runnable {
 
     private static AuthorizationService authorizationService = new DBAuthorization();
 
-    private SocketChannel channel;
     private ObjectInputStream input;
     private ObjectOutputStream output;
 
-    ClientTask(SelectionKey key) throws IOException {
-        channel = (SocketChannel) key.channel();
+    public ClientTask(SelectionKey key) throws IOException {
+        SocketChannel channel = (SocketChannel) key.channel();
         channel.configureBlocking(true);
         input = new ObjectInputStream(Channels.newInputStream(channel));
         output = new ObjectOutputStream(Channels.newOutputStream(channel));
