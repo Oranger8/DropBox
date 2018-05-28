@@ -8,8 +8,8 @@ public class Configuration {
 
     private static Properties properties;
 
-    protected static String HOST;
-    protected static int PORT;
+    public static String HOST;
+    public static int PORT;
 
     static {
         properties = new Properties();

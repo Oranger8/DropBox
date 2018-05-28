@@ -10,6 +10,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,18 +24,18 @@ public class Server extends Configuration implements Runnable {
 
     private LogManager logger;
 
-    private ServerSocketChannel channel;
+    private ServerSocketChannel serverChannel;
     private Selector selector;
     private ExecutorService executor;
 
     private Server() {
         try {
             logger = LogManager.getLogger();
-            channel = ServerSocketChannel.open();
+            serverChannel = ServerSocketChannel.open();
             selector = Selector.open();
-            channel.bind(new InetSocketAddress(PORT));
-            channel.configureBlocking(false);
-            channel.register(selector, channel.validOps());
+            serverChannel.bind(new InetSocketAddress(PORT));
+            serverChannel.configureBlocking(false);
+            serverChannel.register(selector, serverChannel.validOps());
             executor = Executors.newCachedThreadPool();
             Runtime.getRuntime().addShutdownHook(new Thread(this));
         } catch (IOException e) {
@@ -43,25 +44,27 @@ public class Server extends Configuration implements Runnable {
     }
 
     private void start() {
-        while (channel.isOpen()) {
+        while (serverChannel.isOpen()) {
             try {
                 if (selector.select() < 0) continue;
                 Set<SelectionKey> keys = selector.selectedKeys();
-                for (SelectionKey key : keys) {
+                Iterator<SelectionKey> iterator = keys.iterator();
+                while (iterator.hasNext()) {
+                    SelectionKey key = iterator.next();
 
                     if (key.isAcceptable()) {
-                        accept(key);
-                        keys.iterator().remove();
+                        accept();
+                        iterator.remove();
                     }
 
                     if (key.isReadable()) {
                         executor.submit(new ClientTask(key));
-                        keys.iterator().remove();
+                        iterator.remove();
                     }
 
                     if (key.isConnectable()) {
                         disconnect(key);
-                        keys.iterator().remove();
+                        iterator.remove();
                     }
 
                 }
@@ -71,13 +74,13 @@ public class Server extends Configuration implements Runnable {
         }
     }
 
-    private void accept(SelectionKey key) {
-        SocketChannel channel = (SocketChannel) key.channel();
+    private void accept() {
         try {
+            SocketChannel channel = serverChannel.accept();
             channel.configureBlocking(false);
             channel.register(selector, CLIENT_OPS);
         } catch (IOException e) {
-            logger.log("Failed to configure non-blocking client channel", e);
+            logger.log("Failed to accept client connection", e);
         }
     }
 

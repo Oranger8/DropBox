@@ -13,7 +13,7 @@
     <artifactId>AuthorizationService</artifactId>
 
     <properties>
-        <hibernate.version>5.2.16.Final</hibernate.version>
+        <eclipselink.version>2.7.1</eclipselink.version>
         <sqlite.version>3.21.0.1</sqlite.version>
     </properties>
 
@@ -25,15 +25,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>${hibernate.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hibernate.javax.persistence</groupId>
-                    <artifactId>hibernate-jpa-2.2-api</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <version>${eclipselink.version}</version>
         </dependency>
     </dependencies>
 

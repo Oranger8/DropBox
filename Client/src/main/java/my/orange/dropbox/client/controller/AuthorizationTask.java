@@ -1,35 +1,41 @@
 package my.orange.dropbox.client.controller;
 
-import my.orange.dropbox.client.Client;
-import my.orange.dropbox.common.Command;
-import my.orange.dropbox.common.User;
+import my.orange.dropbox.common.Message;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
+import java.nio.channels.Channels;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.Callable;
 
-public class AuthorizationTask implements Callable<Command> {
+import static my.orange.dropbox.client.Configuration.HOST;
+import static my.orange.dropbox.client.Configuration.PORT;
 
-    private User user;
-    private Command command;
+public class AuthorizationTask implements Callable<Message> {
 
-    public AuthorizationTask(User user, Command command) {
-        this.user = user;
-        this.command = command;
+    private Message message;
+
+    public AuthorizationTask(Message message) {
+        this.message = message;
     }
 
     @Override
-    public Command call() {
-        /*try {
-            ObjectInputStream input = new ObjectInputStream(Client.socket.getInputStream());
-            ObjectOutputStream output = new ObjectOutputStream(Client.socket.getOutputStream());
-            output.writeObject(command);
-            output.writeObject(user);
-            return  (Command) input.readObject();
+    public Message call() {
+        Message answer = null;
+        try {
+            SocketChannel channel = SocketChannel.open();
+            channel.connect(new InetSocketAddress(HOST, PORT));
+            ObjectInputStream input = new ObjectInputStream(Channels.newInputStream(channel));
+            ObjectOutputStream output = new ObjectOutputStream(Channels.newOutputStream(channel));
+            output.writeObject(message);
+            answer = (Message) input.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-        }*/
-        return null;
+        } finally {
+            //TODO close connection
+        }
+        return answer;
     }
 }
