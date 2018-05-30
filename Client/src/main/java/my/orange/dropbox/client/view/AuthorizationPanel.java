@@ -80,8 +80,7 @@ public class AuthorizationPanel extends Panel {
                     break;
 
                 case AUTH_SUCCESS:
-                    //Client.user = user;
-                    frame.setAuthorized(true);
+                    frame.authorized(user);
                     break;
 
             }

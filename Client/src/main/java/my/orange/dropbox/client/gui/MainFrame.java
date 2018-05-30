@@ -2,10 +2,13 @@ package my.orange.dropbox.client.gui;
 
 import my.orange.dropbox.client.view.AuthorizationPanel;
 import my.orange.dropbox.client.view.FilesPanel;
+import my.orange.dropbox.common.User;
 
 import javax.swing.*;
 
 public class MainFrame extends JFrame {
+
+    private User user;
 
     public MainFrame() {
         try {
@@ -19,18 +22,23 @@ public class MainFrame extends JFrame {
         ImageIcon icon = new ImageIcon(MainFrame.class.getResource("/image/icon.png"));
         setIconImage(icon.getImage());
         setVisible(true);
-        setAuthorized(false);
+        notAuthorized();
     }
 
-    public void setAuthorized(boolean authorized) {
-        if (authorized) {
-            setContentPane(new FilesPanel(this));
-            pack();
-            setLocationRelativeTo(null);
-        } else {
-            setContentPane(new AuthorizationPanel(this));
-            pack();
-            setLocationRelativeTo(null);
-        }
+    public void notAuthorized() {
+        setContentPane(new AuthorizationPanel(this));
+        pack();
+        setLocationRelativeTo(null);
+    }
+
+    public void authorized(User user) {
+        this.user = user;
+        setContentPane(new FilesPanel(this));
+        pack();
+        setLocationRelativeTo(null);
+    }
+
+    public User getUser() {
+        return user;
     }
 }

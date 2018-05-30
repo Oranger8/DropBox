@@ -1,49 +1,44 @@
 package my.orange.dropbox.client.controller;
 
-import my.orange.dropbox.client.Client;
-import my.orange.dropbox.common.Command;
-import my.orange.dropbox.common.SavedFile;
-import my.orange.dropbox.common.User;
+import my.orange.dropbox.common.Message;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.concurrent.Callable;
+import java.net.Socket;
 
-public class FilesTask implements Callable {
+import static my.orange.dropbox.client.Configuration.HOST;
+import static my.orange.dropbox.client.Configuration.PORT;
 
-    private User user;
-    private SavedFile file;
-    private Command command;
+public class FilesTask extends IOTask {
 
-    public FilesTask(User user, SavedFile file, Command command) {
-        this.user = user;
-        this.file = file;
-        this.command = command;
+    public FilesTask(Message message) {
+        super(message);
     }
 
     @Override
     public Object call() {
-        /*try {
-            ObjectInputStream input = new ObjectInputStream(Client.socket.getInputStream());
-            ObjectOutputStream output = new ObjectOutputStream(Client.socket.getOutputStream());
-            output.writeObject(command);
-            output.writeObject(user);
-            switch (command) {
+        Message answer = null;
+        try {
+            socket = new Socket(HOST, PORT);
+            output = new ObjectOutputStream(socket.getOutputStream());
+            output.writeObject(message);
+            input = new ObjectInputStream(socket.getInputStream());
 
-                case PUT:
-                    output.writeObject(file);
-                    break;
+            switch (message.getCommand()) {
 
-                case DELETE:
-                    output.writeObject(file);
-                    break;
+                case LIST:
+                    answer = (Message) input.readObject();
+                    return answer.getFileList();
 
             }
+
             return input.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            return e;
-        }*/
+            e.printStackTrace();
+        } finally {
+            close();
+        }
         return null;
     }
 }

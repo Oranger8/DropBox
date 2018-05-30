@@ -2,24 +2,27 @@ package my.orange.dropbox.client.view;
 
 import my.orange.dropbox.client.controller.FilesTask;
 import my.orange.dropbox.client.gui.MainFrame;
+import my.orange.dropbox.client.model.Model;
 import my.orange.dropbox.common.Command;
+import my.orange.dropbox.common.Message;
+import my.orange.dropbox.common.SavedFile;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class FilesPanel extends Panel implements ActionListener {
-
-    private FilesTask filesTask;
 
     private JTable table;
     private JButton downloadButton, uploadButton, deleteButton;
 
     public FilesPanel(MainFrame frame) {
         super(frame);
-        table = new JTable();
+        table = new JTable(new Model(getFiles()));
         table.setPreferredSize(new Dimension(500, 400));
+        table.getColumn("Name").setPreferredWidth(350);
         constraints.gridwidth = 3;
         add(table, constraints);
 
@@ -57,5 +60,14 @@ public class FilesPanel extends Panel implements ActionListener {
         if (e.getSource() == deleteButton) {
 
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<SavedFile> getFiles() {
+        return  (List<SavedFile>) new FilesTask(
+                new Message()
+                        .setUser(frame.getUser())
+                        .setCommand(Command.LIST)
+        ).call();
     }
 }

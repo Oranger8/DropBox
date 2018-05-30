@@ -29,7 +29,7 @@ public class LogManager {
                         ".log",
                 true);
         logger.addHandler(handler);
-        logger.setUseParentHandlers(false);
+        //logger.setUseParentHandlers(false);
     }
 
     public static synchronized LogManager getLogger() throws IOException {

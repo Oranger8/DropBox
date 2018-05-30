@@ -6,21 +6,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.concurrent.Callable;
 
 import static my.orange.dropbox.client.Configuration.HOST;
 import static my.orange.dropbox.client.Configuration.PORT;
 
-public class AuthorizationTask implements Callable<Message> {
-
-    private Socket socket;
-    private ObjectInputStream input;
-    private ObjectOutputStream output;
-
-    private Message message;
+public class AuthorizationTask extends IOTask {
 
     public AuthorizationTask(Message message) {
-        this.message = message;
+        super(message);
     }
 
     @Override
@@ -38,29 +31,5 @@ public class AuthorizationTask implements Callable<Message> {
             close();
         }
         return answer;
-    }
-
-    private void close() {
-        if (input != null) {
-            try {
-                input.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if (output != null) {
-            try {
-                output.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if (socket != null) {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }
