@@ -18,12 +18,28 @@
         <client.version>0.0.1</client.version>
     </properties>
 
-    <modules>
-        <module>Server</module>
-        <module>Client</module>
-        <module>Common</module>
-        <module>DBService</module>
-        <module>AuthorizationService</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>all</id>
+            <modules>
+                <module>Server</module>
+                <module>Client</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>server</id>
+            <modules>
+                <module>Server</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>client</id>
+            <modules>
+                <module>Client</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
