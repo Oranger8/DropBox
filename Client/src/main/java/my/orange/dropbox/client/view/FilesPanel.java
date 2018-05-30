@@ -1,6 +1,7 @@
 package my.orange.dropbox.client.view;
 
 import my.orange.dropbox.client.controller.FilesTask;
+import my.orange.dropbox.client.gui.MainFrame;
 import my.orange.dropbox.common.Command;
 
 import javax.swing.*;
@@ -15,7 +16,8 @@ public class FilesPanel extends Panel implements ActionListener {
     private JTable table;
     private JButton downloadButton, uploadButton, deleteButton;
 
-    public FilesPanel() {
+    public FilesPanel(MainFrame frame) {
+        super(frame);
         table = new JTable();
         table.setPreferredSize(new Dimension(500, 400));
         constraints.gridwidth = 3;

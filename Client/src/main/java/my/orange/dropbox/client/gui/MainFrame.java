@@ -4,7 +4,6 @@ import my.orange.dropbox.client.view.AuthorizationPanel;
 import my.orange.dropbox.client.view.FilesPanel;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class MainFrame extends JFrame {
 
@@ -14,7 +13,7 @@ public class MainFrame extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("DropBox");
         setLocationRelativeTo(null);
         ImageIcon icon = new ImageIcon(MainFrame.class.getResource("/image/icon.png"));
@@ -25,11 +24,13 @@ public class MainFrame extends JFrame {
 
     public void setAuthorized(boolean authorized) {
         if (authorized) {
-            setContentPane(new FilesPanel());
+            setContentPane(new FilesPanel(this));
             pack();
+            setLocationRelativeTo(null);
         } else {
-            setContentPane(new AuthorizationPanel());
+            setContentPane(new AuthorizationPanel(this));
             pack();
+            setLocationRelativeTo(null);
         }
     }
 }

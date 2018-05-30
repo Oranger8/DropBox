@@ -8,10 +8,6 @@ import java.util.Objects;
 public class UserEntity {
 
     @Id
-    @Column(name = "ID")
-    private int id;
-
-    @Basic
     @Column(name = "LOGIN")
     private String login;
 
@@ -42,13 +38,12 @@ public class UserEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return id == that.id &&
-                password == that.password &&
+        return password == that.password &&
                 Objects.equals(login, that.login);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, password);
+        return Objects.hash(login, password);
     }
 }

@@ -1,6 +1,7 @@
 package my.orange.dropbox.client.view;
 
 import my.orange.dropbox.client.controller.AuthorizationTask;
+import my.orange.dropbox.client.gui.MainFrame;
 import my.orange.dropbox.common.Command;
 import my.orange.dropbox.common.Message;
 import my.orange.dropbox.common.User;
@@ -14,7 +15,8 @@ public class AuthorizationPanel extends Panel {
     private JTextField loginField, passwordField;
     private JButton loginButton, registerButton;
 
-    public AuthorizationPanel() {
+    public AuthorizationPanel(MainFrame frame) {
+        super(frame);
         loginField = new JTextField();
         loginField.setPreferredSize(FIELD_DIMENSION);
         constraints.insets = new Insets(10, 10, 0, 10);
@@ -64,16 +66,24 @@ public class AuthorizationPanel extends Panel {
         if (task != null) {
             Message message = task.call();
             switch (message.getCommand()) {
+
                 case LOGIN_INCORRECT:
                     JOptionPane.showMessageDialog(this, "Login incorrect");
                     break;
+
                 case PASSWORD_INCORRECT:
                     JOptionPane.showMessageDialog(this, "Password incorrect");
                     break;
+
+                case LOGIN_BUSY:
+                    JOptionPane.showMessageDialog(this, "Login busy");
+                    break;
+
                 case AUTH_SUCCESS:
                     //Client.user = user;
                     frame.setAuthorized(true);
                     break;
+
             }
         }
     }

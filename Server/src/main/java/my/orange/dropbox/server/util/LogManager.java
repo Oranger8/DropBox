@@ -44,11 +44,11 @@ public class LogManager {
         return path;
     }
 
-    public void log(String message, Throwable throwable) {
+    public synchronized void log(String message, Throwable throwable) {
         logger.log(Level.SEVERE, throwable.getMessage(), throwable);
     }
 
-    public void log(String message) {
+    public synchronized void log(String message) {
         logger.log(Level.SEVERE, message);
     }
 }

@@ -13,8 +13,8 @@ public abstract class Panel extends JPanel implements ActionListener {
 
     protected static Dimension FIELD_DIMENSION;
 
-    public Panel() {
-        frame = (MainFrame) getParent();
+    public Panel(MainFrame frame) {
+        this.frame = frame;
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
         FIELD_DIMENSION = new Dimension(150, 27);

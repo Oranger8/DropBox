@@ -6,10 +6,13 @@ import my.orange.authorization.Status;
 import my.orange.dropbox.common.Command;
 import my.orange.dropbox.common.Message;
 import my.orange.dropbox.common.User;
+import my.orange.dropbox.server.util.LogManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -20,43 +23,49 @@ public class ClientTask implements Runnable {
 
     private static AuthorizationService authorizationService = new DBAuthorization();
 
+    private LogManager logger;
+
+    private Socket client;
     private ObjectInputStream input;
     private ObjectOutputStream output;
 
-    public ClientTask(SelectionKey key) throws IOException {
-        SocketChannel channel = (SocketChannel) key.channel();
-        channel.configureBlocking(true);
-        input = new ObjectInputStream(Channels.newInputStream(channel));
-        output = new ObjectOutputStream(Channels.newOutputStream(channel));
+    public ClientTask(Socket socket) throws IOException {
+        client = socket;
+        input = new ObjectInputStream(client.getInputStream());
+        output = new ObjectOutputStream(client.getOutputStream());
     }
 
     @Override
     public void run() {
-        try {
-            Message message = (Message) input.readObject();
-            switch (message.getCommand()) {
+        while (!Thread.interrupted()) {
+            try {
+                logger = LogManager.getLogger();
+                Message message = (Message) input.readObject();
+                switch (message.getCommand()) {
 
-                case LOGIN:
-                    output.writeObject(
-                            new Message()
-                            .setCommand(statusToCommand(authenticate(message.getUser())))
-                    ); break;
+                    case LOGIN:
+                        output.writeObject(new Message()
+                                .setCommand(statusToCommand(authenticate(message.getUser()))));
+                        break;
 
-                case REGISTER:
-                    output.writeObject(
-                            new Message()
-                            .setCommand(statusToCommand(register(message.getUser())))
-                    ); break;
+                    case REGISTER:
+                        output.writeObject(new Message()
+                                .setCommand(statusToCommand(register(message.getUser()))));
+                        break;
 
-                    //TODO File commands
-                case PUT: break;
-                case GET: break;
-                case DELETE: break;
+                    case GET:
 
+                    case PUT:
+
+                    case DELETE:
+
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                logger.log("Client connection reset", e);
+                break;
             }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
         }
+        close();
     }
 
     private Command statusToCommand(Status status) {
@@ -76,5 +85,29 @@ public class ClientTask implements Runnable {
 
     private Status register(User user) {
         return authorizationService.register(user.getLogin(), user.getPassword());
+    }
+
+    private void close() {
+        if (input != null) {
+            try {
+                input.close();
+            } catch (IOException e) {
+                logger.log("", e);
+            }
+        }
+        if (output != null) {
+            try {
+                output.close();
+            } catch (IOException e) {
+                logger.log("", e);
+            }
+        }
+        if (client != null) {
+            try {
+                client.close();
+            } catch (IOException e) {
+                logger.log("", e);
+            }
+        }
     }
 }

@@ -36,6 +36,7 @@ public class DBAuthorization implements AuthorizationService {
 
     @Override
     public Status register(String login, int password) {
+        if (authenticate(login, password) == LOGIN_SUCCESS) return LOGIN_BUSY;
         UserEntity user = new UserEntity();
         user.setLogin(login);
         user.setPassword(password);
