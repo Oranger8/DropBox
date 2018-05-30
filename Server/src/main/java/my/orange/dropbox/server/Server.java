@@ -1,5 +1,8 @@
 package my.orange.dropbox.server;
 
+import my.orange.authorization.AuthorizationService;
+import my.orange.authorization.Status;
+import my.orange.authorization.impl.DBAuthorization;
 import my.orange.dropbox.server.handler.ClientTask;
 import my.orange.dropbox.server.util.Configuration;
 import my.orange.dropbox.server.util.LogManager;
@@ -29,18 +32,18 @@ public class Server extends Configuration implements Runnable {
     private ExecutorService executor;
 
     private Server() {
-        try {
-            logger = LogManager.getLogger();
-            serverChannel = ServerSocketChannel.open();
-            selector = Selector.open();
-            serverChannel.bind(new InetSocketAddress(PORT));
-            serverChannel.configureBlocking(false);
-            serverChannel.register(selector, serverChannel.validOps());
-            executor = Executors.newCachedThreadPool();
-            Runtime.getRuntime().addShutdownHook(new Thread(this));
-        } catch (IOException e) {
-            logger.log("Failed to start server", e);
-        }
+//        try {
+//            logger = LogManager.getLogger();
+//            serverChannel = ServerSocketChannel.open();
+//            selector = Selector.open();
+//            serverChannel.bind(new InetSocketAddress(PORT));
+//            serverChannel.configureBlocking(false);
+//            serverChannel.register(selector, serverChannel.validOps());
+//            executor = Executors.newCachedThreadPool();
+//            Runtime.getRuntime().addShutdownHook(new Thread(this));
+//        } catch (IOException e) {
+//            logger.log("Failed to start server", e);
+//        }
     }
 
     private void start() {
@@ -95,6 +98,10 @@ public class Server extends Configuration implements Runnable {
     }
 
     public static void main(String[] args) {
-        new Server().start();
+        AuthorizationService service = new DBAuthorization();
+        Status status = service.register("test", "test".hashCode());
+        service.close();
+        System.out.println(status);
+//        new Server().start();
     }
 }

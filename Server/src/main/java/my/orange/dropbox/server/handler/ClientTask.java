@@ -1,7 +1,7 @@
 package my.orange.dropbox.server.handler;
 
 import my.orange.authorization.AuthorizationService;
-import my.orange.authorization.DBAuthorization;
+import my.orange.authorization.impl.DBAuthorization;
 import my.orange.authorization.Status;
 import my.orange.dropbox.common.Command;
 import my.orange.dropbox.common.Message;
