@@ -63,7 +63,14 @@ public class ClientTask implements Runnable {
                     break;
 
                 case DELETE:
-
+                    if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
+                        fileManager.delete(message.getUser(), message.getFile());
+                        output.writeObject(new Message()
+                                .setCommand(AUTH_SUCCESS)
+                                .setFileList(fileManager.getFileList(message.getUser())));
+                    } else {
+                        output.writeObject(new Message().setCommand(LOGIN_INCORRECT));
+                    }
                     break;
 
             }

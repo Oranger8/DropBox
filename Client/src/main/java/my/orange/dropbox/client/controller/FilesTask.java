@@ -29,16 +29,18 @@ public class FilesTask extends IOTask {
 
                 case LIST:
                     answer = (Message) input.readObject();
-                    return answer.getFileList();
+                    break;
+
+                case DELETE:
+                    answer = (Message) input.readObject();
+                    break;
 
             }
-
-            return input.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             close();
         }
-        return null;
+        return answer;
     }
 }

@@ -4,6 +4,7 @@ import my.orange.dropbox.common.SavedFile;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import java.util.Comparator;
 import java.util.List;
 
 public class Model implements TableModel {
@@ -12,6 +13,7 @@ public class Model implements TableModel {
 
     public Model(List<SavedFile> files) {
         this.files = files;
+        this.files.sort(Comparator.comparing(SavedFile::getName));
     }
 
     public void setFiles(List<SavedFile> files) {
@@ -74,5 +76,10 @@ public class Model implements TableModel {
     @Override
     public void removeTableModelListener(TableModelListener l) {
 
+    }
+
+    public SavedFile getSavedFile(int row) {
+        if (row == -1) return null;
+        return files.get(row);
     }
 }

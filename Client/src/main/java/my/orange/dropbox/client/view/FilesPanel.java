@@ -16,11 +16,13 @@ import java.util.List;
 public class FilesPanel extends Panel implements ActionListener {
 
     private JTable table;
+    private Model model;
     private JButton downloadButton, uploadButton, deleteButton;
 
     public FilesPanel(MainFrame frame) {
         super(frame);
-        table = new JTable(new Model(getFiles()));
+        model = new Model(getFiles());
+        table = new JTable(model);
         table.setPreferredSize(new Dimension(500, 400));
         table.getColumn("Name").setPreferredWidth(350);
         constraints.gridwidth = 3;
@@ -48,6 +50,7 @@ public class FilesPanel extends Panel implements ActionListener {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == downloadButton) {
 
@@ -58,16 +61,32 @@ public class FilesPanel extends Panel implements ActionListener {
         }
 
         if (e.getSource() == deleteButton) {
-
+            SavedFile file = model.getSavedFile(table.getSelectedRow());
+            if (file != null) {
+                Message answer = (Message) new FilesTask(
+                        new Message()
+                                .setUser(frame.getUser())
+                                .setCommand(Command.DELETE)
+                                .setFile(file)
+                ).call();
+                if (answer.getCommand() == Command.AUTH_SUCCESS) {
+                    model = new Model(answer.getFileList());
+                    table.setModel(model);
+                    table.getColumn("Size").setPreferredWidth(350);
+                } else {
+                    frame.notAuthorized();
+                }
+            }
         }
     }
 
     @SuppressWarnings("unchecked")
     private List<SavedFile> getFiles() {
-        return  (List<SavedFile>) new FilesTask(
+        Message message = (Message) new FilesTask(
                 new Message()
                         .setUser(frame.getUser())
                         .setCommand(Command.LIST)
         ).call();
+        return message.getFileList();
     }
 }

@@ -30,7 +30,12 @@ public class FileManager extends Configuration {
     }
 
     public void delete(User user, SavedFile savedFile) {
-
+        Path file = Paths.get(FOLDER + user.getLogin() + "/" + savedFile.getName());
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            logger.log("Failed to delete file", e);
+        }
     }
 
     public void addFolder(User user) {
