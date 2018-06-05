@@ -2,13 +2,7 @@ package my.orange.dropbox.client.controller;
 
 import my.orange.dropbox.common.Message;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-
-import static my.orange.dropbox.client.Configuration.HOST;
-import static my.orange.dropbox.client.Configuration.PORT;
+import java.io.*;
 
 public class FilesTask extends IOTask {
 
@@ -16,23 +10,36 @@ public class FilesTask extends IOTask {
         super(message);
     }
 
+    public FilesTask(Message message, File file) {
+        super(message, file);
+    }
+
     @Override
     public Object call() {
         Message answer = null;
         try {
-            socket = new Socket(HOST, PORT);
-            output = new ObjectOutputStream(socket.getOutputStream());
-            output.writeObject(message);
-            input = new ObjectInputStream(socket.getInputStream());
+            sendMessage();
 
             switch (message.getCommand()) {
 
                 case LIST:
-                    answer = (Message) input.readObject();
+                    objectInput = new ObjectInputStream(socket.getInputStream());
+                    answer = (Message) objectInput.readObject();
                     break;
 
                 case DELETE:
-                    answer = (Message) input.readObject();
+                    objectInput = new ObjectInputStream(socket.getInputStream());
+                    answer = (Message) objectInput.readObject();
+                    break;
+
+                case GET:
+                    if (file == null) break;
+                    download();
+                    break;
+
+                case PUT:
+                    if (file == null) break;
+                    upload();
                     break;
 
             }
@@ -42,5 +49,27 @@ public class FilesTask extends IOTask {
             close();
         }
         return answer;
+    }
+
+    private void download() throws IOException {
+        bufferedInput = new BufferedInputStream(socket.getInputStream());
+        fileOutput = new FileOutputStream(file);
+        int count;
+        byte[] buffer = new byte[2048];
+        while ((count = bufferedInput.read(buffer)) > 0) {
+            fileOutput.write(buffer, 0, count);
+        }
+        fileOutput.flush();
+    }
+
+    private void upload() throws IOException {
+        bufferedOutput = new BufferedOutputStream(socket.getOutputStream());
+        fileInput = new FileInputStream(file);
+        int count;
+        byte[] buffer = new byte[2048];
+        while ((count = fileInput.read(buffer)) > 0) {
+            bufferedOutput.write(buffer, 0, count);
+        }
+        bufferedOutput.flush();
     }
 }

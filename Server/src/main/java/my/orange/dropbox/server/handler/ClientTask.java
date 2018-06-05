@@ -8,9 +8,7 @@ import my.orange.dropbox.common.Message;
 import my.orange.dropbox.common.User;
 import my.orange.dropbox.server.util.LogManager;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 
 import static my.orange.dropbox.common.Command.*;
@@ -23,53 +21,61 @@ public class ClientTask implements Runnable {
     private LogManager logger;
 
     private Socket client;
-    private ObjectInputStream input;
-    private ObjectOutputStream output;
+    private ObjectInputStream objectInput;
+    private ObjectOutputStream objectOutput;
+    private BufferedInputStream bufferedInput;
+    private BufferedOutputStream bufferedOutput;
 
     public ClientTask(Socket socket) throws IOException {
         client = socket;
-        input = new ObjectInputStream(client.getInputStream());
-        output = new ObjectOutputStream(client.getOutputStream());
+        objectInput = new ObjectInputStream(client.getInputStream());
     }
 
     @Override
     public void run() {
         try {
             logger = LogManager.getLogger();
-            Message message = (Message) input.readObject();
+            Message message = (Message) objectInput.readObject();
             switch (message.getCommand()) {
 
                 case LOGIN:
-                    output.writeObject(new Message()
+                    objectOutput = new ObjectOutputStream(client.getOutputStream());
+                    objectOutput.writeObject(new Message()
                             .setCommand(statusToCommand(authenticate(message.getUser()))));
                     break;
 
                 case REGISTER:
-                    output.writeObject(new Message()
+                    objectOutput = new ObjectOutputStream(client.getOutputStream());
+                    objectOutput.writeObject(new Message()
                             .setCommand(statusToCommand(register(message.getUser()))));
                     break;
 
                 case LIST:
-                    output.writeObject(new Message()
+                    objectOutput = new ObjectOutputStream(client.getOutputStream());
+                    objectOutput.writeObject(new Message()
                             .setFileList(fileManager.getFileList(message.getUser())));
                     break;
 
                 case GET:
-
+                    if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
+                        fileManager.upload(message.getUser(), message.getFile(), client.getOutputStream());
+                    }
                     break;
 
                 case PUT:
-
+                    if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
+                        fileManager.download(message.getUser(), message.getFile(), client.getInputStream());
+                    }
                     break;
 
                 case DELETE:
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
                         fileManager.delete(message.getUser(), message.getFile());
-                        output.writeObject(new Message()
+                        objectOutput.writeObject(new Message()
                                 .setCommand(AUTH_SUCCESS)
                                 .setFileList(fileManager.getFileList(message.getUser())));
                     } else {
-                        output.writeObject(new Message().setCommand(LOGIN_INCORRECT));
+                        objectOutput.writeObject(new Message().setCommand(LOGIN_INCORRECT));
                     }
                     break;
 
@@ -105,16 +111,16 @@ public class ClientTask implements Runnable {
     }
 
     private void close() {
-        if (input != null) {
+        if (objectInput != null) {
             try {
-                input.close();
+                objectInput.close();
             } catch (IOException e) {
                 logger.log("", e);
             }
         }
-        if (output != null) {
+        if (objectOutput != null) {
             try {
-                output.close();
+                objectOutput.close();
             } catch (IOException e) {
                 logger.log("", e);
             }

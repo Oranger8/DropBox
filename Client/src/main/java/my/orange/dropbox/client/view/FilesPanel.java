@@ -1,6 +1,7 @@
 package my.orange.dropbox.client.view;
 
 import my.orange.dropbox.client.controller.FilesTask;
+import my.orange.dropbox.client.gui.FileChooser;
 import my.orange.dropbox.client.gui.MainFrame;
 import my.orange.dropbox.client.model.Model;
 import my.orange.dropbox.common.Command;
@@ -53,11 +54,27 @@ public class FilesPanel extends Panel implements ActionListener {
     @SuppressWarnings("unchecked")
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == downloadButton) {
-
+            SavedFile file = model.getSavedFile(table.getSelectedRow());
+            if (file != null) {
+                new FilesTask(
+                        new Message()
+                                .setUser(frame.getUser())
+                                .setCommand(Command.GET)
+                                .setFile(file),
+                        new FileChooser(this).choose());
+            }
         }
 
         if (e.getSource() == uploadButton) {
-
+            SavedFile file = model.getSavedFile(table.getSelectedRow());
+            if (file != null) {
+                new FilesTask(
+                        new Message()
+                                .setUser(frame.getUser())
+                                .setCommand(Command.PUT)
+                                .setFile(file),
+                        new FileChooser(this).choose());
+            }
         }
 
         if (e.getSource() == deleteButton) {
