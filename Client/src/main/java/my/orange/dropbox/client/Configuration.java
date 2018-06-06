@@ -6,13 +6,11 @@ import java.util.Properties;
 
 public class Configuration {
 
-    private static Properties properties;
-
     public static String HOST;
     public static int PORT;
 
     static {
-        properties = new Properties();
+        Properties properties = new Properties();
         InputStream in = null;
         try {
             in = Configuration.class.getResourceAsStream("/config.properties");

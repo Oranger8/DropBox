@@ -3,7 +3,6 @@ package my.orange.dropbox.client.controller;
 import my.orange.dropbox.common.Message;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 
 public class AuthorizationTask extends IOTask {
 
@@ -13,11 +12,9 @@ public class AuthorizationTask extends IOTask {
 
     @Override
     public Message call() {
-        Message answer = null;
         try {
-            sendMessage();
-            objectInput = new ObjectInputStream(socket.getInputStream());
-            answer = (Message) objectInput.readObject();
+            send();
+            receive();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {

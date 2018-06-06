@@ -14,6 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import static my.orange.dropbox.common.Command.*;
+
 public class FilesPanel extends Panel implements ActionListener {
 
     private JTable table;
@@ -22,10 +24,8 @@ public class FilesPanel extends Panel implements ActionListener {
 
     public FilesPanel(MainFrame frame) {
         super(frame);
-        model = new Model(getFiles());
-        table = new JTable(model);
+        table = new JTable();
         table.setPreferredSize(new Dimension(500, 400));
-        table.getColumn("Name").setPreferredWidth(350);
         constraints.gridwidth = 3;
         add(table, constraints);
 
@@ -48,6 +48,8 @@ public class FilesPanel extends Panel implements ActionListener {
         constraints.anchor = GridBagConstraints.EAST;
         constraints.gridx = 2;
         add(deleteButton, constraints);
+
+        updateModel(getFiles());
     }
 
     @Override
@@ -56,24 +58,36 @@ public class FilesPanel extends Panel implements ActionListener {
         if (e.getSource() == downloadButton) {
             SavedFile file = model.getSavedFile(table.getSelectedRow());
             if (file != null) {
-                new FilesTask(
+                Message answer = (Message) new FilesTask(
                         new Message()
                                 .setUser(frame.getUser())
                                 .setCommand(Command.GET)
                                 .setFile(file),
-                        new FileChooser(this).choose());
+                        new FileChooser(this).choose()
+                ).call();
+
+                if (answer.getCommand() == LOGIN_INCORRECT) {
+                    frame.notAuthorized();
+                }
             }
         }
 
         if (e.getSource() == uploadButton) {
             SavedFile file = model.getSavedFile(table.getSelectedRow());
             if (file != null) {
-                new FilesTask(
+                Message answer = (Message) new FilesTask(
                         new Message()
                                 .setUser(frame.getUser())
-                                .setCommand(Command.PUT)
+                                .setCommand(PUT)
                                 .setFile(file),
-                        new FileChooser(this).choose());
+                        new FileChooser(this).choose()
+                ).call();
+
+                if (answer.getCommand() == AUTH_SUCCESS) {
+                    updateModel(answer.getFileList());
+                } else {
+                    frame.notAuthorized();
+                }
             }
         }
 
@@ -83,13 +97,12 @@ public class FilesPanel extends Panel implements ActionListener {
                 Message answer = (Message) new FilesTask(
                         new Message()
                                 .setUser(frame.getUser())
-                                .setCommand(Command.DELETE)
+                                .setCommand(DELETE)
                                 .setFile(file)
                 ).call();
-                if (answer.getCommand() == Command.AUTH_SUCCESS) {
-                    model = new Model(answer.getFileList());
-                    table.setModel(model);
-                    table.getColumn("Size").setPreferredWidth(350);
+
+                if (answer.getCommand() == AUTH_SUCCESS) {
+                    updateModel(answer.getFileList());
                 } else {
                     frame.notAuthorized();
                 }
@@ -97,13 +110,20 @@ public class FilesPanel extends Panel implements ActionListener {
         }
     }
 
+    private void updateModel(List<SavedFile> files) {
+        model = new Model(files);
+        table.setModel(model);
+        table.getColumn("Name").setPreferredWidth(350);
+    }
+
     @SuppressWarnings("unchecked")
     private List<SavedFile> getFiles() {
-        Message message = (Message) new FilesTask(
+        Message answer = (Message) new FilesTask(
                 new Message()
                         .setUser(frame.getUser())
                         .setCommand(Command.LIST)
         ).call();
-        return message.getFileList();
+
+        return answer.getFileList();
     }
 }

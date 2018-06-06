@@ -16,10 +16,6 @@ public class Model implements TableModel {
         this.files.sort(Comparator.comparing(SavedFile::getName));
     }
 
-    public void setFiles(List<SavedFile> files) {
-        this.files = files;
-    }
-
     @Override
     public int getRowCount() {
         return files.size();

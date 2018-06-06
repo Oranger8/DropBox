@@ -2,34 +2,28 @@ package my.orange.dropbox.client.controller;
 
 import my.orange.dropbox.common.Message;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 public class FilesTask extends IOTask {
 
-    public FilesTask(Message message) {
-        super(message);
+    public FilesTask(Message request) {
+        super(request);
     }
 
-    public FilesTask(Message message, File file) {
-        super(message, file);
+    public FilesTask(Message request, File file) {
+        super(request, file);
     }
 
     @Override
     public Object call() {
-        Message answer = null;
         try {
-            sendMessage();
+            send();
 
-            switch (message.getCommand()) {
-
-                case LIST:
-                    objectInput = new ObjectInputStream(socket.getInputStream());
-                    answer = (Message) objectInput.readObject();
-                    break;
+            switch (request.getCommand()) {
 
                 case DELETE:
-                    objectInput = new ObjectInputStream(socket.getInputStream());
-                    answer = (Message) objectInput.readObject();
+                    receive();
                     break;
 
                 case GET:
@@ -49,27 +43,5 @@ public class FilesTask extends IOTask {
             close();
         }
         return answer;
-    }
-
-    private void download() throws IOException {
-        bufferedInput = new BufferedInputStream(socket.getInputStream());
-        fileOutput = new FileOutputStream(file);
-        int count;
-        byte[] buffer = new byte[2048];
-        while ((count = bufferedInput.read(buffer)) > 0) {
-            fileOutput.write(buffer, 0, count);
-        }
-        fileOutput.flush();
-    }
-
-    private void upload() throws IOException {
-        bufferedOutput = new BufferedOutputStream(socket.getOutputStream());
-        fileInput = new FileInputStream(file);
-        int count;
-        byte[] buffer = new byte[2048];
-        while ((count = fileInput.read(buffer)) > 0) {
-            bufferedOutput.write(buffer, 0, count);
-        }
-        bufferedOutput.flush();
     }
 }

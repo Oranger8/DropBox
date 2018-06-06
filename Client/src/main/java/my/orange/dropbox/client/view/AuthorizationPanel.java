@@ -49,39 +49,29 @@ public class AuthorizationPanel extends Panel {
         User user = getUser();
         if (user == null) return;
 
-        AuthorizationTask task = null;
+        Message answer = null;
 
         if (e.getSource() == loginButton) {
-            task = new AuthorizationTask(new Message()
+            answer = new AuthorizationTask(new Message()
                     .setUser(user)
-                    .setCommand(Command.LOGIN));
+                    .setCommand(Command.LOGIN)).call();
         }
 
         if (e.getSource() == registerButton) {
-            task = new AuthorizationTask(new Message()
+            answer = new AuthorizationTask(new Message()
                     .setUser(user)
-                    .setCommand(Command.REGISTER));
+                    .setCommand(Command.REGISTER)).call();
         }
 
-        if (task != null) {
-            Message message = task.call();
-            switch (message.getCommand()) {
-
-                case LOGIN_INCORRECT:
-                    JOptionPane.showMessageDialog(this, "Login incorrect");
-                    break;
-
-                case PASSWORD_INCORRECT:
-                    JOptionPane.showMessageDialog(this, "Password incorrect");
-                    break;
-
-                case LOGIN_BUSY:
-                    JOptionPane.showMessageDialog(this, "Login busy");
-                    break;
+        if (answer != null) {
+            switch (answer.getCommand()) {
 
                 case AUTH_SUCCESS:
                     frame.authorized(user);
                     break;
+
+                    default:
+                        JOptionPane.showMessageDialog(this, answer.getCommand().getTitle());
 
             }
         }

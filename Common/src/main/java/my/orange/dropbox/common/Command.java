@@ -22,6 +22,10 @@ public enum Command implements Serializable {
         this.statuses = statuses;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public static Command getByString(String string) {
         for (Command c : Command.values()) {
             if (c.title.equalsIgnoreCase(string)) return c;
