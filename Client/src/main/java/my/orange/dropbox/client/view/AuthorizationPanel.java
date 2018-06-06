@@ -49,23 +49,22 @@ public class AuthorizationPanel extends Panel {
         User user = getUser();
         if (user == null) return;
 
-        AuthorizationTask task = null;
+        Message answer = null;
 
         if (e.getSource() == loginButton) {
-            task = new AuthorizationTask(new Message()
+            answer = new AuthorizationTask(new Message()
                     .setUser(user)
-                    .setCommand(Command.LOGIN));
+                    .setCommand(Command.LOGIN)).call();
         }
 
         if (e.getSource() == registerButton) {
-            task = new AuthorizationTask(new Message()
+            answer = new AuthorizationTask(new Message()
                     .setUser(user)
-                    .setCommand(Command.REGISTER));
+                    .setCommand(Command.REGISTER)).call();
         }
 
-        if (task != null) {
-            Message message = task.call();
-            switch (message.getCommand()) {
+        if (answer != null) {
+            switch (answer.getCommand()) {
 
                 case LOGIN_INCORRECT:
                     JOptionPane.showMessageDialog(this, "Login incorrect");

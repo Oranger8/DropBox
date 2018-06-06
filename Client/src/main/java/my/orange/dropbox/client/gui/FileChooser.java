@@ -17,7 +17,7 @@ public class FileChooser {
     }
 
     public File choose() {
-        int state = chooser.showSaveDialog(panel);
+        int state = chooser.showDialog(panel, "123");
         if (state != JFileChooser.APPROVE_OPTION) return null;
         return chooser.getSelectedFile();
     }

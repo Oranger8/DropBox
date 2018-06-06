@@ -23,8 +23,6 @@ public class ClientTask implements Runnable {
     private Socket client;
     private ObjectInputStream objectInput;
     private ObjectOutputStream objectOutput;
-    private BufferedInputStream bufferedInput;
-    private BufferedOutputStream bufferedOutput;
 
     public ClientTask(Socket socket) throws IOException {
         client = socket;
@@ -38,37 +36,31 @@ public class ClientTask implements Runnable {
             Message message = (Message) objectInput.readObject();
             switch (message.getCommand()) {
 
-                case LOGIN:
-                    objectOutput = new ObjectOutputStream(client.getOutputStream());
-                    objectOutput.writeObject(new Message()
-                            .setCommand(statusToCommand(authenticate(message.getUser()))));
-                    break;
-
-                case REGISTER:
-                    objectOutput = new ObjectOutputStream(client.getOutputStream());
-                    objectOutput.writeObject(new Message()
-                            .setCommand(statusToCommand(register(message.getUser()))));
-                    break;
-
-                case LIST:
-                    objectOutput = new ObjectOutputStream(client.getOutputStream());
-                    objectOutput.writeObject(new Message()
-                            .setFileList(fileManager.getFileList(message.getUser())));
-                    break;
-
                 case GET:
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
                         fileManager.upload(message.getUser(), message.getFile(), client.getOutputStream());
+                        objectOutput = new ObjectOutputStream(client.getOutputStream());
+                        objectOutput.writeObject(new Message()
+                                .setCommand(AUTH_SUCCESS));
+                    } else {
+                        objectOutput.writeObject(new Message().setCommand(LOGIN_INCORRECT));
                     }
                     break;
 
                 case PUT:
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
                         fileManager.download(message.getUser(), message.getFile(), client.getInputStream());
+                        objectOutput = new ObjectOutputStream(client.getOutputStream());
+                        objectOutput.writeObject(new Message()
+                                .setCommand(AUTH_SUCCESS)
+                                .setFileList(fileManager.getFileList(message.getUser())));
+                    } else {
+                        objectOutput.writeObject(new Message().setCommand(LOGIN_INCORRECT));
                     }
                     break;
 
                 case DELETE:
+                    objectOutput = new ObjectOutputStream(client.getOutputStream());
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
                         fileManager.delete(message.getUser(), message.getFile());
                         objectOutput.writeObject(new Message()
@@ -79,6 +71,9 @@ public class ClientTask implements Runnable {
                     }
                     break;
 
+                default:
+                    authAction(message);
+
             }
         } catch (IOException | ClassNotFoundException e) {
             logger.log("Client connection reset", e);
@@ -87,15 +82,21 @@ public class ClientTask implements Runnable {
         }
     }
 
-    private Command statusToCommand(Status status) {
-        switch (status) {
-            case LOGIN_SUCCESS: return AUTH_SUCCESS;
-            case REGISTRATION_SUCCESS: return AUTH_SUCCESS;
-            case LOGIN_INCORRECT: return LOGIN_INCORRECT;
-            case PASSWORD_INCORRECT: return PASSWORD_INCORRECT;
-            case LOGIN_BUSY: return LOGIN_BUSY;
+    private void authAction(Message message) throws IOException {
+        Status status = null;
+        if (message.getCommand() == LOGIN) status = authenticate(message.getUser());
+        if (message.getCommand() == REGISTER) status = register(message.getUser());
+        if (status == null) return;
+        Command answer = Command.getByString(status.getTitle());
+        objectOutput = new ObjectOutputStream(client.getOutputStream());
+        if (answer == AUTH_SUCCESS) {
+            objectOutput.writeObject(new Message()
+                    .setCommand(answer)
+                    .setFileList(fileManager.getFileList(message.getUser())));
+        } else {
+            objectOutput.writeObject(new Message()
+                    .setCommand(answer));
         }
-        return null;
     }
 
     private Status authenticate(User user) {
