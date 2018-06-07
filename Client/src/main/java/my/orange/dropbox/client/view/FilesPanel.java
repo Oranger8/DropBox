@@ -22,7 +22,7 @@ public class FilesPanel extends Panel implements ActionListener {
     private Model model;
     private JButton downloadButton, uploadButton, deleteButton;
 
-    public FilesPanel(MainFrame frame) {
+    public FilesPanel(MainFrame frame, List<SavedFile> files) {
         super(frame);
         table = new JTable();
         table.setPreferredSize(new Dimension(500, 400));
@@ -49,7 +49,7 @@ public class FilesPanel extends Panel implements ActionListener {
         constraints.gridx = 2;
         add(deleteButton, constraints);
 
-        updateModel(getFiles());
+        updateModel(files);
     }
 
     @Override
@@ -73,21 +73,17 @@ public class FilesPanel extends Panel implements ActionListener {
         }
 
         if (e.getSource() == uploadButton) {
-            SavedFile file = model.getSavedFile(table.getSelectedRow());
-            if (file != null) {
-                Message answer = (Message) new FilesTask(
-                        new Message()
-                                .setUser(frame.getUser())
-                                .setCommand(PUT)
-                                .setFile(file),
-                        new FileChooser(this).choose()
-                ).call();
+            Message answer = (Message) new FilesTask(
+                    new Message()
+                            .setUser(frame.getUser())
+                            .setCommand(PUT),
+                    new FileChooser(this).choose()
+            ).call();
 
-                if (answer.getCommand() == AUTH_SUCCESS) {
-                    updateModel(answer.getFileList());
-                } else {
-                    frame.notAuthorized();
-                }
+            if (answer.getCommand() == AUTH_SUCCESS) {
+                updateModel(answer.getFileList());
+            } else {
+                frame.notAuthorized();
             }
         }
 
@@ -114,16 +110,5 @@ public class FilesPanel extends Panel implements ActionListener {
         model = new Model(files);
         table.setModel(model);
         table.getColumn("Name").setPreferredWidth(350);
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<SavedFile> getFiles() {
-        Message answer = (Message) new FilesTask(
-                new Message()
-                        .setUser(frame.getUser())
-                        .setCommand(Command.LIST)
-        ).call();
-
-        return answer.getFileList();
     }
 }

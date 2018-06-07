@@ -2,9 +2,11 @@ package my.orange.dropbox.client.gui;
 
 import my.orange.dropbox.client.view.AuthorizationPanel;
 import my.orange.dropbox.client.view.FilesPanel;
+import my.orange.dropbox.common.SavedFile;
 import my.orange.dropbox.common.User;
 
 import javax.swing.*;
+import java.util.List;
 
 public class MainFrame extends JFrame {
 
@@ -31,9 +33,9 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
     }
 
-    public void authorized(User user) {
+    public void authorized(User user, List<SavedFile> files) {
         this.user = user;
-        setContentPane(new FilesPanel(this));
+        setContentPane(new FilesPanel(this, files));
         pack();
         setLocationRelativeTo(null);
     }

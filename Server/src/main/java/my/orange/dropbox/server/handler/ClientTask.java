@@ -38,10 +38,10 @@ public class ClientTask implements Runnable {
 
                 case GET:
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
-                        fileManager.upload(message.getUser(), message.getFile(), client.getOutputStream());
                         objectOutput = new ObjectOutputStream(client.getOutputStream());
                         objectOutput.writeObject(new Message()
                                 .setCommand(AUTH_SUCCESS));
+                        fileManager.upload(message.getUser(), message.getFile(), client.getOutputStream());
                     } else {
                         objectOutput.writeObject(new Message().setCommand(LOGIN_INCORRECT));
                     }
@@ -49,8 +49,10 @@ public class ClientTask implements Runnable {
 
                 case PUT:
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
-                        fileManager.download(message.getUser(), message.getFile(), client.getInputStream());
                         objectOutput = new ObjectOutputStream(client.getOutputStream());
+                        objectOutput.writeObject(new Message()
+                                .setCommand(AUTH_SUCCESS));
+                        fileManager.download(message.getUser(), message.getFile(), client.getInputStream());
                         objectOutput.writeObject(new Message()
                                 .setCommand(AUTH_SUCCESS)
                                 .setFileList(fileManager.getFileList(message.getUser())));
@@ -106,7 +108,7 @@ public class ClientTask implements Runnable {
     }
 
     private Status register(User user) {
-        Status status = authorizationService.authenticate(user.getLogin(), user.getPassword());
+        Status status = authorizationService.register(user.getLogin(), user.getPassword());
         if (status == Status.REGISTRATION_SUCCESS) fileManager.addFolder(user);
         return status;
     }
@@ -121,6 +123,7 @@ public class ClientTask implements Runnable {
         }
         if (objectOutput != null) {
             try {
+                objectOutput.flush();
                 objectOutput.close();
             } catch (IOException e) {
                 logger.log("", e);

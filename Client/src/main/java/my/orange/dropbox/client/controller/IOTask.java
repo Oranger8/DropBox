@@ -7,12 +7,9 @@ import java.net.Socket;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
-import static my.orange.dropbox.client.Configuration.HOST;
-import static my.orange.dropbox.client.Configuration.PORT;
-
 abstract class IOTask implements Callable {
 
-    private Socket socket;
+    protected Socket socket;
     private ObjectInputStream objectInput;
     private ObjectOutputStream objectOutput;
     private BufferedInputStream bufferedInput;
@@ -34,13 +31,11 @@ abstract class IOTask implements Callable {
     }
 
     void send() throws IOException {
-        socket = new Socket(HOST, PORT);
         objectOutput = new ObjectOutputStream(socket.getOutputStream());
         objectOutput.writeObject(request);
     }
 
     void receive() throws IOException, ClassNotFoundException {
-        socket = new Socket(HOST, PORT);
         objectInput = new ObjectInputStream(socket.getInputStream());
         answer = (Message) objectInput.readObject();
     }

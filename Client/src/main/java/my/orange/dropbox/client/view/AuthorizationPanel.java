@@ -67,7 +67,7 @@ public class AuthorizationPanel extends Panel {
             switch (answer.getCommand()) {
 
                 case AUTH_SUCCESS:
-                    frame.authorized(user);
+                    frame.authorized(user, answer.getFileList());
                     break;
 
                     default:
