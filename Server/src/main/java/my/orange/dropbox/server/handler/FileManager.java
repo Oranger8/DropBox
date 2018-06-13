@@ -26,18 +26,22 @@ public class FileManager extends Configuration {
         }
     }
 
-    public void download(User user, SavedFile savedFile, ObjectInputStream objectInput) {
+    void download(User user, SavedFile savedFile, ObjectInputStream objectInput) {
         File file = new File(FOLDER + user.getLogin() + "/" + savedFile.getName());
-        if (file.exists()) file.delete();
-        new FileExchange().download(objectInput, file);
+        if (file.exists()) {
+            if (!file.delete()) {
+                logger.log("Failed to remove file " + file);
+            }
+        }
+        FileExchange.download(objectInput, file);
     }
 
-    public void upload(User user, SavedFile savedFile, ObjectOutputStream objectOutput) {
+    void upload(User user, SavedFile savedFile, ObjectOutputStream objectOutput) {
         File file = new File(FOLDER + user.getLogin() + "/" + savedFile.getName());
-        new FileExchange().upload(objectOutput, file);
+        FileExchange.upload(objectOutput, file);
     }
 
-    public void delete(User user, SavedFile savedFile) {
+    void delete(User user, SavedFile savedFile) {
         Path file = Paths.get(FOLDER + user.getLogin() + "/" + savedFile.getName());
         try {
             Files.deleteIfExists(file);
@@ -46,7 +50,7 @@ public class FileManager extends Configuration {
         }
     }
 
-    public void addFolder(User user) {
+    void addFolder(User user) {
         Path files = Paths.get(FOLDER);
         if (!Files.exists(files) || !Files.isDirectory(files)) {
             try {
@@ -65,7 +69,7 @@ public class FileManager extends Configuration {
         }
     }
 
-    public List<SavedFile> getFileList(User user) {
+    List<SavedFile> getFileList(User user) {
         List<SavedFile> list = new LinkedList<>();
         Path folder = Paths.get(FOLDER + user.getLogin());
         try {

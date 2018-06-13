@@ -13,10 +13,9 @@ import static my.orange.dropbox.client.Configuration.PORT;
 
 abstract class IOTask implements Callable {
 
-    protected Socket socket;
+    private Socket socket;
     private ObjectInputStream objectInput;
     private ObjectOutputStream objectOutput;
-    private FileExchange fileExchange;
 
     Message request;
     Message answer;
@@ -43,13 +42,11 @@ abstract class IOTask implements Callable {
     }
 
     void download() {
-        if (fileExchange == null) fileExchange = new FileExchange();
-        fileExchange.download(objectInput, file);
+        FileExchange.download(objectInput, file);
     }
 
     void upload() {
-        if (fileExchange == null) fileExchange = new FileExchange();
-        fileExchange.upload(objectOutput, file);
+        FileExchange.upload(objectOutput, file);
     }
 
     void close() {
