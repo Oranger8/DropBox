@@ -1,5 +1,6 @@
 package my.orange.dropbox.client.controller;
 
+import my.orange.dropbox.common.FileExchange;
 import my.orange.dropbox.common.Message;
 
 import java.io.*;
@@ -7,25 +8,26 @@ import java.net.Socket;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
+import static my.orange.dropbox.client.Configuration.HOST;
+import static my.orange.dropbox.client.Configuration.PORT;
+
 abstract class IOTask implements Callable {
 
     protected Socket socket;
     private ObjectInputStream objectInput;
     private ObjectOutputStream objectOutput;
-    private BufferedInputStream bufferedInput;
-    private BufferedOutputStream bufferedOutput;
-    private FileInputStream fileInput;
-    private FileOutputStream fileOutput;
+    private FileExchange fileExchange;
 
     Message request;
     Message answer;
     File file;
 
-    IOTask(Message request) {
+    IOTask(Message request) throws IOException {
         this(request, null);
     }
 
-    IOTask(Message request, File file) {
+    IOTask(Message request, File file) throws IOException {
+        socket = new Socket(HOST, PORT);
         this.request = request;
         this.file = file;
     }
@@ -36,39 +38,23 @@ abstract class IOTask implements Callable {
     }
 
     void receive() throws IOException, ClassNotFoundException {
-        objectInput = new ObjectInputStream(socket.getInputStream());
+        if (objectInput == null) objectInput = new ObjectInputStream(socket.getInputStream());
         answer = (Message) objectInput.readObject();
     }
 
-    void download() throws IOException {
-        bufferedInput = new BufferedInputStream(socket.getInputStream());
-        fileOutput = new FileOutputStream(file);
-        int count;
-        byte[] buffer = new byte[2048];
-        while ((count = bufferedInput.read(buffer)) > 0) {
-            fileOutput.write(buffer, 0, count);
-        }
-        fileOutput.flush();
+    void download() {
+        if (fileExchange == null) fileExchange = new FileExchange();
+        fileExchange.download(objectInput, file);
     }
 
-    void upload() throws IOException {
-        bufferedOutput = new BufferedOutputStream(socket.getOutputStream());
-        fileInput = new FileInputStream(file);
-        int count;
-        byte[] buffer = new byte[2048];
-        while ((count = fileInput.read(buffer)) > 0) {
-            bufferedOutput.write(buffer, 0, count);
-        }
-        bufferedOutput.flush();
+    void upload() {
+        if (fileExchange == null) fileExchange = new FileExchange();
+        fileExchange.upload(objectOutput, file);
     }
 
     void close() {
         Stream.of(objectInput,
-                objectOutput,
-                bufferedInput,
-                bufferedOutput,
-                fileInput,
-                fileOutput)
+                objectOutput)
                 .forEach(closeable -> {
                     if (closeable != null) {
                         try {

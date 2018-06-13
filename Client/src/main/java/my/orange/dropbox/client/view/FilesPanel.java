@@ -12,6 +12,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static my.orange.dropbox.common.Command.*;
@@ -58,13 +60,20 @@ public class FilesPanel extends Panel implements ActionListener {
         if (e.getSource() == downloadButton) {
             SavedFile file = model.getSavedFile(table.getSelectedRow());
             if (file != null) {
-                Message answer = (Message) new FilesTask(
-                        new Message()
-                                .setUser(frame.getUser())
-                                .setCommand(Command.GET)
-                                .setFile(file),
-                        new FileChooser(this).choose()
-                ).call();
+                Message answer;
+                try {
+                    answer = (Message) new FilesTask(
+                            new Message()
+                                    .setUser(frame.getUser())
+                                    .setCommand(Command.GET)
+                                    .setFile(file),
+                            new FileChooser(this).choose()
+                    ).call();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    frame.notAuthorized();
+                    return;
+                }
 
                 if (answer.getCommand() == LOGIN_INCORRECT) {
                     frame.notAuthorized();
@@ -73,12 +82,21 @@ public class FilesPanel extends Panel implements ActionListener {
         }
 
         if (e.getSource() == uploadButton) {
-            Message answer = (Message) new FilesTask(
-                    new Message()
-                            .setUser(frame.getUser())
-                            .setCommand(PUT),
-                    new FileChooser(this).choose()
-            ).call();
+            Message answer;
+            try {
+                File file = new FileChooser(this).choose();
+                answer = (Message) new FilesTask(
+                        new Message()
+                                .setUser(frame.getUser())
+                                .setCommand(PUT)
+                                .setFile(new SavedFile(file)),
+                        file
+                ).call();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                frame.notAuthorized();
+                return;
+            }
 
             if (answer.getCommand() == AUTH_SUCCESS) {
                 updateModel(answer.getFileList());
@@ -90,12 +108,19 @@ public class FilesPanel extends Panel implements ActionListener {
         if (e.getSource() == deleteButton) {
             SavedFile file = model.getSavedFile(table.getSelectedRow());
             if (file != null) {
-                Message answer = (Message) new FilesTask(
-                        new Message()
-                                .setUser(frame.getUser())
-                                .setCommand(DELETE)
-                                .setFile(file)
-                ).call();
+                Message answer;
+                try {
+                    answer = (Message) new FilesTask(
+                            new Message()
+                                    .setUser(frame.getUser())
+                                    .setCommand(DELETE)
+                                    .setFile(file)
+                    ).call();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    frame.notAuthorized();
+                    return;
+                }
 
                 if (answer.getCommand() == AUTH_SUCCESS) {
                     updateModel(answer.getFileList());

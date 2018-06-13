@@ -5,35 +5,31 @@ import my.orange.dropbox.common.Message;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
-
-import static my.orange.dropbox.client.Configuration.HOST;
-import static my.orange.dropbox.client.Configuration.PORT;
 
 public class FilesTask extends IOTask {
 
-    public FilesTask(Message request) {
+    public FilesTask(Message request) throws IOException {
         super(request);
     }
 
-    public FilesTask(Message request, File file) {
+    public FilesTask(Message request, File file) throws IOException {
         super(request, file);
     }
 
     @Override
     public Object call() {
         try {
-            socket = new Socket(HOST, PORT);
-            send();
 
             switch (request.getCommand()) {
 
                 case DELETE:
+                    send();
                     receive();
                     break;
 
                 case GET:
                     if (file == null) break;
+                    send();
                     receive();
                     if (answer.getCommand() == Command.AUTH_SUCCESS) {
                         download();
@@ -41,7 +37,8 @@ public class FilesTask extends IOTask {
                     break;
 
                 case PUT:
-                    if (file == null) break;
+                    if (request.getFile() == null) break;
+                    send();
                     receive();
                     if (answer.getCommand() == Command.AUTH_SUCCESS) {
                         upload();

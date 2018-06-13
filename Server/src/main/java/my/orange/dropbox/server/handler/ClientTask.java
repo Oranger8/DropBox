@@ -24,24 +24,24 @@ public class ClientTask implements Runnable {
     private ObjectInputStream objectInput;
     private ObjectOutputStream objectOutput;
 
-    public ClientTask(Socket socket) throws IOException {
+    public ClientTask(Socket socket) {
         client = socket;
-        objectInput = new ObjectInputStream(client.getInputStream());
     }
 
     @Override
     public void run() {
         try {
             logger = LogManager.getLogger();
+            objectInput = new ObjectInputStream(client.getInputStream());
             Message message = (Message) objectInput.readObject();
+            objectOutput = new ObjectOutputStream(client.getOutputStream());
             switch (message.getCommand()) {
 
                 case GET:
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
-                        objectOutput = new ObjectOutputStream(client.getOutputStream());
                         objectOutput.writeObject(new Message()
                                 .setCommand(AUTH_SUCCESS));
-                        fileManager.upload(message.getUser(), message.getFile(), client.getOutputStream());
+                        fileManager.upload(message.getUser(), message.getFile(), objectOutput);
                     } else {
                         objectOutput.writeObject(new Message().setCommand(LOGIN_INCORRECT));
                     }
@@ -49,10 +49,9 @@ public class ClientTask implements Runnable {
 
                 case PUT:
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
-                        objectOutput = new ObjectOutputStream(client.getOutputStream());
                         objectOutput.writeObject(new Message()
                                 .setCommand(AUTH_SUCCESS));
-                        fileManager.download(message.getUser(), message.getFile(), client.getInputStream());
+                        fileManager.download(message.getUser(), message.getFile(), objectInput);
                         objectOutput.writeObject(new Message()
                                 .setCommand(AUTH_SUCCESS)
                                 .setFileList(fileManager.getFileList(message.getUser())));
@@ -62,7 +61,6 @@ public class ClientTask implements Runnable {
                     break;
 
                 case DELETE:
-                    objectOutput = new ObjectOutputStream(client.getOutputStream());
                     if (authenticate(message.getUser()) == Status.LOGIN_SUCCESS) {
                         fileManager.delete(message.getUser(), message.getFile());
                         objectOutput.writeObject(new Message()
@@ -90,7 +88,6 @@ public class ClientTask implements Runnable {
         if (message.getCommand() == REGISTER) status = register(message.getUser());
         if (status == null) return;
         Command answer = Command.getByString(status.getTitle());
-        objectOutput = new ObjectOutputStream(client.getOutputStream());
         if (answer == AUTH_SUCCESS) {
             objectOutput.writeObject(new Message()
                     .setCommand(answer)

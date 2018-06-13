@@ -9,6 +9,7 @@ import my.orange.dropbox.common.User;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 public class AuthorizationPanel extends Panel {
 
@@ -52,15 +53,25 @@ public class AuthorizationPanel extends Panel {
         Message answer = null;
 
         if (e.getSource() == loginButton) {
-            answer = new AuthorizationTask(new Message()
-                    .setUser(user)
-                    .setCommand(Command.LOGIN)).call();
+            try {
+                answer = new AuthorizationTask(new Message()
+                        .setUser(user)
+                        .setCommand(Command.LOGIN)).call();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                return;
+            }
         }
 
         if (e.getSource() == registerButton) {
-            answer = new AuthorizationTask(new Message()
-                    .setUser(user)
-                    .setCommand(Command.REGISTER)).call();
+            try {
+                answer = new AuthorizationTask(new Message()
+                        .setUser(user)
+                        .setCommand(Command.REGISTER)).call();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                return;
+            }
         }
 
         if (answer != null) {

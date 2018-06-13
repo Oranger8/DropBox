@@ -1,5 +1,6 @@
 package my.orange.dropbox.server.handler;
 
+import my.orange.dropbox.common.FileExchange;
 import my.orange.dropbox.common.SavedFile;
 import my.orange.dropbox.common.User;
 import my.orange.dropbox.server.util.Configuration;
@@ -25,57 +26,15 @@ public class FileManager extends Configuration {
         }
     }
 
-    public void download(User user, SavedFile savedFile, InputStream inputStream) {
+    public void download(User user, SavedFile savedFile, ObjectInputStream objectInput) {
         File file = new File(FOLDER + user.getLogin() + "/" + savedFile.getName());
         if (file.exists()) file.delete();
-        BufferedInputStream input;
-        FileOutputStream output = null;
-        try {
-            input = new BufferedInputStream(inputStream);
-            output = new FileOutputStream(file);
-            int count;
-            byte[] buffer = new byte[2048];
-            while ((count = input.read(buffer)) > 0) {
-                output.write(buffer, 0, count);
-            }
-            output.flush();
-        } catch (IOException e) {
-            logger.log("Failed to send file", e);
-        } finally {
-            if (output != null) {
-                try {
-                    output.close();
-                } catch (IOException e) {
-                    logger.log(file.getAbsolutePath() + " failed to close", e);
-                }
-            }
-        }
+        new FileExchange().download(objectInput, file);
     }
 
-    public void upload(User user, SavedFile savedFile, OutputStream outputStream) {
+    public void upload(User user, SavedFile savedFile, ObjectOutputStream objectOutput) {
         File file = new File(FOLDER + user.getLogin() + "/" + savedFile.getName());
-        FileInputStream input = null;
-        BufferedOutputStream output;
-        try {
-            input = new FileInputStream(file);
-            output = new BufferedOutputStream(outputStream);
-            int count;
-            byte[] buffer = new byte[2048];
-            while ((count = input.read(buffer)) > 0) {
-                output.write(buffer, 0, count);
-            }
-            output.flush();
-        } catch (IOException e) {
-            logger.log("Failed to send file", e);
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    logger.log(file.getAbsolutePath() + " failed to close", e);
-                }
-            }
-        }
+        new FileExchange().upload(objectOutput, file);
     }
 
     public void delete(User user, SavedFile savedFile) {
