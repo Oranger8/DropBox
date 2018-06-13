@@ -11,6 +11,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 
+import static my.orange.dropbox.common.Command.*;
+
 public class AuthorizationPanel extends Panel {
 
     private JTextField loginField, passwordField;
@@ -50,42 +52,44 @@ public class AuthorizationPanel extends Panel {
         User user = getUser();
         if (user == null) return;
 
-        Message answer = null;
+        Message answer;
+
+        try {
+            answer = new AuthorizationTask(new Message()
+                    .setUser(user)
+                    .setCommand(LOGIN)).call();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        }
 
         if (e.getSource() == loginButton) {
             try {
-                answer = new AuthorizationTask(new Message()
-                        .setUser(user)
-                        .setCommand(Command.LOGIN)).call();
+                answer = authorization(user, LOGIN);
             } catch (IOException ex) {
                 ex.printStackTrace();
-                return;
             }
-        }
-
-        if (e.getSource() == registerButton) {
+        } else if (e.getSource() == registerButton) {
             try {
-                answer = new AuthorizationTask(new Message()
-                        .setUser(user)
-                        .setCommand(Command.REGISTER)).call();
+                answer = authorization(user, REGISTER);
             } catch (IOException ex) {
                 ex.printStackTrace();
-                return;
             }
         }
 
         if (answer != null) {
-            switch (answer.getCommand()) {
-
-                case AUTH_SUCCESS:
-                    frame.authorized(user, answer.getFileList());
-                    break;
-
-                    default:
-                        JOptionPane.showMessageDialog(this, answer.getCommand().getTitle());
-
+            if (answer.getCommand() == AUTH_SUCCESS) {
+                frame.authorized(user, answer.getFileList());
+            } else {
+                JOptionPane.showMessageDialog(this, answer.getCommand().getTitle());
             }
         }
+    }
+
+    private Message authorization(User user, Command command) throws IOException {
+        return new AuthorizationTask(new Message()
+                .setUser(user)
+                .setCommand(command)).call();
     }
 
     private User getUser() {
