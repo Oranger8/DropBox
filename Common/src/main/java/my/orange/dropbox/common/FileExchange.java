@@ -30,6 +30,7 @@ public class FileExchange {
 
     public static void upload(ObjectOutputStream objectOutput, File file) {
         FileInputStream fileInput = null;
+        int i =0;
         try {
             fileInput = new FileInputStream(file);
             int count;
