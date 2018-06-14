@@ -6,6 +6,7 @@ import my.orange.dropbox.common.SavedFile;
 import my.orange.dropbox.common.User;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 
 public class MainFrame extends JFrame {
@@ -15,29 +16,30 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {}
+        try {
+            new Tray(this).build();
+            setDefaultCloseOperation(HIDE_ON_CLOSE);
+        } catch (AWTException | UnsupportedOperationException e) {
+            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         }
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("DropBox");
-        setLocationRelativeTo(null);
         ImageIcon icon = new ImageIcon(MainFrame.class.getResource("/image/icon.png"));
         setIconImage(icon.getImage());
-        setVisible(true);
         notAuthorized();
+        setVisible(true);
+        setResizable(false);
     }
 
     public void notAuthorized() {
         setContentPane(new AuthorizationPanel(this));
         pack();
-        setLocationRelativeTo(null);
     }
 
     public void authorized(User user, List<SavedFile> files) {
         this.user = user;
         setContentPane(new FilesPanel(this, files));
         pack();
-        setLocationRelativeTo(null);
     }
 
     public User getUser() {
