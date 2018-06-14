@@ -10,10 +10,15 @@ public class SavedFile implements Serializable {
 
     public SavedFile(File file) {
         name = file.getName();
-        if (file.length() > 1024 * 1024 * 1024) size = file.length() / 1024 / 1024 / 1024 + "GB";
-        if (file.length() > 1024 * 1024) size = file.length() / 1024 / 1024 + "MB";
-        if (file.length() > 1024) size = file.length() / 1024 + "KB";
-        size = file.length() + "B";
+        if (file.length() > 1024 * 1024 * 1024) {
+            size = file.length() / 1024 / 1024 / 1024 + " GB";
+        } else if (file.length() > 1024 * 1024) {
+            size = file.length() / 1024 / 1024 + " MB";
+        } else if (file.length() > 1024) {
+            size = file.length() / 1024 + " KB";
+        } else {
+            size = file.length() + " B";
+        }
     }
 
     public String getSize() {
