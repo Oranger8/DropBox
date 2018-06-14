@@ -8,7 +8,6 @@ import java.awt.event.MouseEvent;
 public class Tray extends MouseAdapter {
 
     private MainFrame frame;
-    private SystemTray tray;
     private TrayIcon icon;
 
     Tray(MainFrame frame) {
@@ -16,14 +15,16 @@ public class Tray extends MouseAdapter {
         PopupMenu menu = new PopupMenu("DropBox");
         MenuItem item = new MenuItem("Exit", new MenuShortcut(KeyEvent.VK_Q));
         menu.add(item);
-        Image image = Toolkit.getDefaultToolkit().getImage(Tray.class.getResource("/image/icon.png"));
-        icon = new TrayIcon(image, "DropBox", menu);
+        icon = new TrayIcon(
+                Toolkit.getDefaultToolkit().getImage(Tray.class.getResource("/image/icon.png")),
+                "DropBox",
+                menu);
         icon.setImageAutoSize(true);
         icon.addMouseListener(this);
     }
 
     void build() throws AWTException {
-        tray = SystemTray.getSystemTray();
+        SystemTray tray = SystemTray.getSystemTray();
         tray.add(icon);
     }
 

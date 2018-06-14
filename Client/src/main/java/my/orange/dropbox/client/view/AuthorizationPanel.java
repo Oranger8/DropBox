@@ -82,6 +82,8 @@ public class AuthorizationPanel extends Panel {
                 frame.authorized(user, answer.getFileList());
             } else {
                 JOptionPane.showMessageDialog(this, answer.getCommand().getTitle());
+                passwordField.setText("");
+                passwordField.requestFocusInWindow();
             }
         }
     }
@@ -95,10 +97,12 @@ public class AuthorizationPanel extends Panel {
     private User getUser() {
         if (loginField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Login is empty");
+            loginField.requestFocusInWindow();
             return null;
         }
         if (passwordField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Password is empty");
+            passwordField.requestFocusInWindow();
             return null;
         }
         return new User(loginField.getText(), passwordField.getText());

@@ -55,7 +55,6 @@ public class FilesPanel extends Panel implements ActionListener {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == downloadButton) {
             SavedFile file = model.getSavedFile(table.getSelectedRow());

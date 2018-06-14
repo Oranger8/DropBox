@@ -5,12 +5,13 @@
     <parent>
         <artifactId>DropBox</artifactId>
         <groupId>my.orange</groupId>
-        <version>0.0.1</version>
+        <version>1.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>AuthorizationService</artifactId>
+    <version>1.0.0</version>
 
     <properties>
         <eclipselink.version>2.7.1</eclipselink.version>

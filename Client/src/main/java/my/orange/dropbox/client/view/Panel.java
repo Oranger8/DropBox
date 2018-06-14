@@ -8,15 +8,14 @@ import java.awt.event.ActionListener;
 
 public abstract class Panel extends JPanel implements ActionListener {
 
-    protected MainFrame frame;
-    protected GridBagConstraints constraints;
+    MainFrame frame;
+    GridBagConstraints constraints;
 
-    protected static Dimension FIELD_DIMENSION;
+    static final Dimension FIELD_DIMENSION = new Dimension(150, 27);
 
-    public Panel(MainFrame frame) {
+    Panel(MainFrame frame) {
         this.frame = frame;
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
-        FIELD_DIMENSION = new Dimension(150, 27);
     }
 }

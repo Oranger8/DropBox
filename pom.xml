@@ -7,15 +7,14 @@
     <groupId>my.orange</groupId>
     <artifactId>DropBox</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <common.version>0.0.1</common.version>
-        <server.version>0.0.1</server.version>
-        <client.version>0.0.1</client.version>
+        <authorizationService.version>1.0.0</authorizationService.version>
+        <common.version>1.0.0</common.version>
     </properties>
 
     <modules>
